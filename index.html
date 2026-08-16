@@ -1592,6 +1592,11 @@
     document.getElementById('dailyChallenge').textContent = '🔥 Today\'s Challenge: ' + CHALLENGES[challengeIdx];
   }
 
+  function toLocalISO(d) {
+    const off = d.getTimezoneOffset();
+    return new Date(d.getTime() - off * 60000).toISOString().split('T')[0];
+  }
+
   function renderCalendar() {
     const grid = document.getElementById('calendarGrid');
     const today = new Date();
@@ -1606,7 +1611,7 @@
 
     for (let d = 1; d <= monthEnd.getDate(); d++) {
       const dateObj = new Date(today.getFullYear(), today.getMonth(), d);
-      const dateStr = dateObj.toISOString().split('T')[0];
+      const dateStr = toLocalISO(dateObj);
       const hasWorkout = state.workoutDates.includes(dateStr);
       const isToday = dateStr === todayISO();
       html += `<div class="calendar-day ${hasWorkout ? 'has-workout' : ''} ${isToday ? 'today' : ''}">${d}</div>`;
@@ -1899,18 +1904,20 @@
 
   // ---------------- Name Setup ----------------
   document.getElementById('btnSetName').addEventListener('click', () => {
-    const nameInput = document.getElementById('nameInput');
-    const name = nameInput.value.trim();
-    if (!name) {
-      showToast('Please enter your name');
-      nameInput.focus();
-      return;
-    }
-    setUserName(name);
-    document.getElementById('nameOverlay').classList.add('hidden');
-    showToast('Welcome, ' + name + '! 🎉');
-    renderDashboard();
-  });
+  const nameInput = document.getElementById('nameInput');
+  const name = nameInput.value.trim();
+  if (!name) {
+    showToast('Please enter your name');
+    nameInput.focus();
+    return;
+  }
+  setUserName(name);
+  const overlay = document.getElementById('nameOverlay');
+  overlay.classList.add('hidden');
+  overlay.style.display = 'none';   // force-close, bypass any CSS specificity issue
+  showToast('Welcome, ' + name + '! 🎉');
+  renderDashboard();
+});
 
   document.getElementById('nameInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
